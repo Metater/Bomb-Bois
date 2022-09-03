@@ -20,4 +20,9 @@ public class ItemManager : NetworkBehaviour
         item = items.Find(i => i.netId == netId);
         return item != null;
     }
+
+    public void DroppedItem(Item item)
+    {
+        item.transform.SetParent(itemsTransform);
+    }
 }

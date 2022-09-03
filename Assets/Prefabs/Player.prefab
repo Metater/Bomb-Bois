@@ -237,6 +237,7 @@ GameObject:
   - component: {fileID: 5122590985792611391}
   - component: {fileID: 5122590985792611329}
   - component: {fileID: 5122590985792611328}
+  - component: {fileID: 2317994395418420856}
   - component: {fileID: 5122590985792611330}
   - component: {fileID: 419259823955123667}
   - component: {fileID: 4024227999121082740}
@@ -304,9 +305,9 @@ MonoBehaviour:
   interpolatePosition: 1
   interpolateRotation: 1
   interpolateScale: 0
-  bufferTimeMultiplier: 1
+  bufferTimeMultiplier: 3
   bufferSizeLimit: 64
-  catchupThreshold: 4
+  catchupThreshold: 6
   catchupMultiplier: 0.1
   onlySyncOnChange: 1
   bufferResetMultiplier: 5
@@ -316,6 +317,41 @@ MonoBehaviour:
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+--- !u!114 &2317994395418420856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122590985792611390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  sendInterval: 0.05
+  syncPosition: 0
+  syncRotation: 1
+  syncScale: 0
+  interpolatePosition: 0
+  interpolateRotation: 1
+  interpolateScale: 0
+  bufferTimeMultiplier: 3
+  bufferSizeLimit: 64
+  catchupThreshold: 6
+  catchupMultiplier: 0.1
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  target: {fileID: 8926713828234015117}
 --- !u!114 &5122590985792611330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,6 +376,9 @@ MonoBehaviour:
   body: {fileID: 8926713828752120322}
   hands: {fileID: 8926713828234015116}
   grip: {fileID: 8926713826990989937}
+  crosshairDefaultColor: {r: 1, g: 1, b: 1, a: 0.49803922}
+  crosshairHoverPlayerColor: {r: 0.6886792, g: 0.24363652, b: 0.24363652, a: 0.49803922}
+  crosshairHoverItemColor: {r: 0.2028302, g: 0.56634724, b: 0.8113208, a: 0.49803922}
   walkingSpeed: 6.5
   runningSpeed: 9
   jumpSpeed: 8
@@ -347,10 +386,11 @@ MonoBehaviour:
   lookSpeed: 2
   lookXLimit: 90
   momentumLerp: 0.8
-  drag: 4
+  punchDrag: 1
   punchForce: 16
+  punchCooldown: 1
   reachDistance: 4
-  slotCount: 3
+  slotCount: 1
   selectedSlotSynced: 0
 --- !u!143 &419259823955123667
 CharacterController:

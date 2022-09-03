@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using UnityEngine.UI;
 
 public class PlayerScript : NetworkBehaviour
 {
@@ -11,14 +12,19 @@ public class PlayerScript : NetworkBehaviour
 
     // Private Set Unity References
     [SerializeField] private CharacterController characterController;
-    [Space]
+    [Header("Invisable To Self")]
     [SerializeField] private List<GameObject> invisibleToSelf;
-    [Space]
+    [Header("GameObjects")]
     [SerializeField] private GameObject body;
     [SerializeField] private GameObject hands;
     [SerializeField] private GameObject grip;
+    [Header("Colors")]
+    [SerializeField] private Color crosshairDefaultColor;
+    [SerializeField] private Color crosshairHoverPlayerColor;
+    [SerializeField] private Color crosshairHoverItemColor;
 
     // Private Set Unity Variables
+    [Header("Movement")]
     [SerializeField] public float walkingSpeed;
     [SerializeField] public float runningSpeed;
     [SerializeField] public float jumpSpeed;
@@ -27,9 +33,10 @@ public class PlayerScript : NetworkBehaviour
     [SerializeField] private float lookXLimit;
     [SerializeField] private float momentumLerp;
 
-    [SerializeField] private float drag;
+    [Header("Interaction")]
+    [SerializeField] private float punchDrag;
     [SerializeField] private float punchForce;
-
+    [SerializeField] private double punchCooldown;
     [SerializeField] private float reachDistance;
     [SerializeField] private int slotCount;
 
@@ -38,7 +45,9 @@ public class PlayerScript : NetworkBehaviour
     private Vector3 moveDirection = Vector3.zero;
     private float lastSpeedX = 0;
     private float lastSpeedY = 0;
-    private Vector3 velocity = Vector3.zero;
+
+    private Vector3 punchVelocity = Vector3.zero;
+    private double punchableTime = 0;
 
     private int selectedSlotLocal = 0;
     private Item[] slots;
@@ -59,7 +68,7 @@ public class PlayerScript : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        velocity *= 1 - drag * Time.fixedDeltaTime;
+        punchVelocity *= 1 - punchDrag * Time.fixedDeltaTime;
     }
 
     private void Update()
@@ -74,26 +83,41 @@ public class PlayerScript : NetworkBehaviour
             SetCursorVisible(!Cursor.visible);
         }
 
+        Color crosshairColor = crosshairDefaultColor;
+
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out var hit, reachDistance))
         {
-            if (Input.GetMouseButtonDown(0))
+            if (hit.transform.gameObject.TryGetComponent<PlayerScript>(out var player))
             {
-                if (hit.transform.gameObject.TryGetComponent<PlayerScript>(out var player))
+                if (Input.GetMouseButtonDown(0))
                 {
                     CmdPunch(player.netId);
                 }
+                crosshairColor = crosshairHoverPlayerColor;
             }
-            if (Input.GetKeyDown(KeyCode.E))
+            if (hit.transform.gameObject.TryGetComponent<Item>(out var item) && !item.IsPickedUp)
             {
-                if (hit.transform.gameObject.TryGetComponent<Item>(out var item))
+                if (Input.GetKeyDown(KeyCode.E))
                 {
                     CmdPickupItem(item.netIdentity);
                 }
+                crosshairColor = crosshairHoverItemColor;
             }
         }
 
+        manager.crosshair.color = crosshairColor;
+
         Inventory();
+
+        Item selectedItem = slots[selectedSlotLocal];
+        if (selectedItem is not null)
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                CmdDropItem(selectedItem.netIdentity, Camera.main.transform.forward);
+            }
+        }
 
         Move();
     }
@@ -142,11 +166,35 @@ public class PlayerScript : NetworkBehaviour
     [Command]
     public void CmdPickupItem(NetworkIdentity netId)
     {
-        // TODO checks
+        if (itemManager.TryGetItemByNetId(netId.netId, out var item) && !item.IsPickedUp)
+        {
+            byte slot = (byte)selectedSlotSynced;
+            if (slots[slot] is null)
+            {
+                netId.AssignClientAuthority(connectionToClient);
+                RpcPickedUpItem(netId.netId, slot);
+            }
+        }
+    }
+    [Command]
+    public void CmdDropItem(NetworkIdentity netId, Vector3 dropVector)
+    {
         if (itemManager.TryGetItemByNetId(netId.netId, out var item))
         {
-            netId.AssignClientAuthority(connectionToClient);
-            RpcPickedUpItem(netId.netId);
+            for (int i = 0; i < slotCount; i++)
+            {
+                Item slot = slots[i];
+                if (slot is null)
+                {
+                    continue;
+                }
+                if (slot.netId == netId.netId)
+                {
+                    RpcDroppedItem(netId.netId, (byte)i, dropVector);
+                    netId.RemoveClientAuthority();
+                    break;
+                }
+            }
         }
     }
 
@@ -159,7 +207,7 @@ public class PlayerScript : NetworkBehaviour
             {
                 if (Vector3.Distance(player.transform.position, transform.position) < reachDistance * 2f)
                 {
-                    player.RpcAddInstantaneousForce((player.transform.position - transform.position).normalized * punchForce);
+                    player.RpcPunch((player.transform.position - transform.position).normalized * punchForce);
                 }
             }
         }
@@ -168,20 +216,35 @@ public class PlayerScript : NetworkBehaviour
 
     #region Client RPCs
     [ClientRpc]
-    public void RpcAddInstantaneousForce(Vector3 force)
+    public void RpcPunch(Vector3 force)
     {
-        velocity += force;
+        if (manager.TimeSinceStart >= punchableTime)
+        {
+            punchableTime = manager.TimeSinceStart + punchCooldown;
+            punchVelocity += force;
+        }
     }
     [ClientRpc]
-    public void RpcPickedUpItem(uint netId)
+    public void RpcPickedUpItem(uint netId, byte slot)
     {
         if (itemManager.TryGetItemByNetId(netId, out var item))
         {
-            // check slot not occupied
             item.transform.SetParent(grip.transform);
             item.transform.localPosition = Vector3.zero;
-            slots[selectedSlotLocal] = item;
+
+            slots[slot] = item;
             item.PickupInternal();
+        }
+    }
+    [ClientRpc]
+    public void RpcDroppedItem(uint netId, byte slot, Vector3 dropVector)
+    {
+        if (itemManager.TryGetItemByNetId(netId, out var item))
+        {
+            itemManager.DroppedItem(item);
+
+            slots[slot] = null;
+            item.DropInternal(dropVector);
         }
     }
     #endregion Client RPCs
@@ -237,7 +300,7 @@ public class PlayerScript : NetworkBehaviour
         {
             selectedSlotLocal = 0;
         }
-        else if (selectedSlotLocal > slotCount)
+        else if (selectedSlotLocal >= slotCount)
         {
             selectedSlotLocal = slotCount - 1;
         }
@@ -274,7 +337,7 @@ public class PlayerScript : NetworkBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
 
         Vector3 moveDelta = moveDirection * Time.deltaTime;
-        Vector3 forceDelta = velocity * Time.deltaTime;
+        Vector3 forceDelta = punchVelocity * Time.deltaTime;
         characterController.Move(moveDelta + forceDelta);
 
         rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;

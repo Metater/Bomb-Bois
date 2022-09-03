@@ -3,9 +3,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour
 {
+    // Public Set Unity References
+    public Image crosshair;
+
     // Private Set Unity References
     [SerializeField] private GameObject startButtonGO;
 
@@ -19,6 +23,9 @@ public class GameManager : NetworkBehaviour
 
     // Public Events
     public event Action OnButtonStartPressed;
+
+    // 1 sec punch cooldown
+    // knockback up when punched
 
     #region Unity
     private void Update()
