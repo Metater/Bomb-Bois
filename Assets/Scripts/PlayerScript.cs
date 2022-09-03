@@ -11,6 +11,7 @@ public class PlayerScript : NetworkBehaviour
     private ItemManager itemManager;
 
     // Private Set Unity References
+    [Header("CharacterController")]
     [SerializeField] private CharacterController characterController;
     [Header("Invisable To Self")]
     [SerializeField] private List<GameObject> invisibleToSelf;
@@ -68,7 +69,7 @@ public class PlayerScript : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        punchVelocity *= 1 - punchDrag * Time.fixedDeltaTime;
+        punchVelocity *= 1 - (punchDrag * Time.fixedDeltaTime);
     }
 
     private void Update()
@@ -337,8 +338,8 @@ public class PlayerScript : NetworkBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
 
         Vector3 moveDelta = moveDirection * Time.deltaTime;
-        Vector3 forceDelta = punchVelocity * Time.deltaTime;
-        characterController.Move(moveDelta + forceDelta);
+        Vector3 punchDelta = punchVelocity * Time.deltaTime;
+        characterController.Move(moveDelta + punchDelta);
 
         rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
         rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
