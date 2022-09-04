@@ -15,6 +15,11 @@ public class ItemManager : NetworkBehaviour
     [SerializeField] private List<Item> items;
     [SerializeField] private Transform itemsTransform;
 
+    private void Awake()
+    {
+        items = new List<Item>(itemsTransform.GetComponentsInChildren<Item>(true));
+    }
+
     public bool TryGetItemByNetId(uint netId, out Item item)
     {
         item = items.Find(i => i.netId == netId);

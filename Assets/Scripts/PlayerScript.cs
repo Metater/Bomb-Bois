@@ -109,7 +109,7 @@ public class PlayerScript : NetworkBehaviour
 
         manager.crosshair.color = crosshairColor;
 
-        Inventory();
+        SelectSlot();
 
         Item selectedItem = slots[selectedSlotLocal];
         if (selectedItem is not null)
@@ -283,7 +283,7 @@ public class PlayerScript : NetworkBehaviour
         }
     }
 
-    private void Inventory()
+    private void SelectSlot()
     {
         int originalSelectedSlotLocal = selectedSlotLocal;
 
@@ -295,6 +295,19 @@ public class PlayerScript : NetworkBehaviour
         else if (mouseScrollDelta < 0) // scroll down
         {
             selectedSlotLocal--;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            selectedSlotLocal = 0;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            selectedSlotLocal = 1;
+        }
+        else if (!Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            selectedSlotLocal = 2;
         }
 
         if (selectedSlotLocal < 0)
@@ -353,6 +366,7 @@ public class PlayerScript : NetworkBehaviour
         if (transform.position.y < -25)
         {
             transform.position = new Vector3(0, 25, 0);
+            moveDirection.y = 0f;
         }
     }
 
