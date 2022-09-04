@@ -369,18 +369,5 @@ public class PlayerScript : NetworkBehaviour
             moveDirection.y = 0f;
         }
     }
-
-    private void PositionHeldItemsOnGrip()
-    {
-        foreach (var item in slots)
-        {
-            if (item is null)
-            {
-                continue;
-            }
-
-            item.transform.position = grip.transform.position;
-        }
-    }
     #endregion Private
 }
