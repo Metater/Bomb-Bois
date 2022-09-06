@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class GameManager : NetworkBehaviour
 {
     // Public Set Unity References
-    public Image crosshair;
+    public Image crosshairImage;
 
     // Private Set Unity References
     [SerializeField] private GameObject startButtonGO;
@@ -24,13 +24,10 @@ public class GameManager : NetworkBehaviour
     // Public Events
     public event Action OnButtonStartPressed;
 
-    // 1 sec punch cooldown
-    // knockback up when punched
-
     #region Unity
     private void Start()
     {
-        //NetworkManager.singleton.StartServer();
+
     }
 
     private void Update()
@@ -42,19 +39,26 @@ public class GameManager : NetworkBehaviour
     #region NetworkBehaviour Callbacks
     #endregion NetworkBehaviour Callbacks
 
-    #region Buttons
+    #region Button Start
     public void ButtonStart()
     {
         startButtonGO.SetActive(false);
 
-        // TODO Not server only safe, client rpcs cant be called on only servers, i think...
+        if (isServerOnly)
+        {
+            SharedButtonStart();
+        }
+
         RpcButtonStart();
     }
-    #endregion Buttons
 
-    #region Client RPCs
     [ClientRpc]
     public void RpcButtonStart()
+    {
+        SharedButtonStart();
+    }
+
+    private void SharedButtonStart()
     {
         HasStarted = true;
         StartTime = Time.timeAsDouble;
@@ -62,8 +66,5 @@ public class GameManager : NetworkBehaviour
 
         OnButtonStartPressed?.Invoke();
     }
-    #endregion Client RPCs
-
-    #region Private
-    #endregion Private
+    #endregion Buttons
 }

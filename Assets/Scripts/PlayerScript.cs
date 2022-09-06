@@ -1,19 +1,16 @@
-using System.Collections;
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
-using UnityEngine.UI;
 
 public class PlayerScript : NetworkBehaviour
 {
-    // Private Set Unity References
+    // Private Runtime Set Unity References
     private GameManager manager;
     private ItemManager itemManager;
 
     // Private Set Unity References
-    [Header("CharacterController")]
     [SerializeField] private CharacterController characterController;
-    [Header("Invisable To Self")]
+    [Space]
     [SerializeField] private List<GameObject> invisibleToSelf;
     [Header("GameObjects")]
     [SerializeField] private GameObject body;
@@ -33,11 +30,10 @@ public class PlayerScript : NetworkBehaviour
     [SerializeField] private float lookSpeed;
     [SerializeField] private float lookXLimit;
     [SerializeField] private float momentumLerp;
-
     [Header("Interaction")]
     [SerializeField] private float punchDrag;
     [SerializeField] private float punchForce;
-    [SerializeField] private double punchCooldown;
+    [SerializeField] private double punchCooldownTime;
     [SerializeField] private float reachDistance;
     [SerializeField] private int slotCount;
 
@@ -56,6 +52,9 @@ public class PlayerScript : NetworkBehaviour
     [SyncVar(hook = nameof(OnSlotChanged))]
     public int selectedSlotSynced = 0;
 
+    public Vector3 lastPosition = Vector3.zero;
+    public Vector3 velocity = Vector3.zero;
+
     #region Unity
     private void Awake()
     {
@@ -67,28 +66,46 @@ public class PlayerScript : NetworkBehaviour
         slots = new Item[slotCount];
     }
 
+    private void Start()
+    {
+        lastPosition = transform.position;
+    }
+
     private void FixedUpdate()
     {
+        // Break if not own player or not started
+        if (!isLocalPlayer || !manager.HasStarted)
+        {
+            return;
+        }
+
+        // Apply drag to punch velocity
         punchVelocity *= 1 - (punchDrag * Time.fixedDeltaTime);
     }
 
     private void Update()
     {
-        if (!isLocalPlayer)
+        velocity = (transform.position - lastPosition) / Time.deltaTime;
+        lastPosition = transform.position;
+
+        // Break if not own player or not started
+        if (!isLocalPlayer || !manager.HasStarted)
         {
             return;
         }
 
+        // Handle cursor visibility
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             SetCursorVisible(!Cursor.visible);
         }
 
+        // Handle interaction
         Color crosshairColor = crosshairDefaultColor;
-
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out var hit, reachDistance))
         {
+            // Player interaction
             if (hit.transform.gameObject.TryGetComponent<PlayerScript>(out var player))
             {
                 if (Input.GetMouseButtonDown(0))
@@ -97,17 +114,17 @@ public class PlayerScript : NetworkBehaviour
                 }
                 crosshairColor = crosshairHoverPlayerColor;
             }
-            if (hit.transform.gameObject.TryGetComponent<Item>(out var item) && !item.IsPickedUp)
+            // Item interaction
+            else if (hit.transform.gameObject.TryGetComponent<Item>(out var item) && !item.IsPickedUp)
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    CmdPickupItem(item.netIdentity);
+                    CmdPickupItem(item.netId);
                 }
                 crosshairColor = crosshairHoverItemColor;
             }
         }
-
-        manager.crosshair.color = crosshairColor;
+        manager.crosshairImage.color = crosshairColor;
 
         SelectSlot();
 
@@ -116,7 +133,7 @@ public class PlayerScript : NetworkBehaviour
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                CmdDropItem(selectedItem.netIdentity, Camera.main.transform.forward);
+                CmdDropItem(selectedItem.netId, Camera.main.transform.forward);
             }
         }
 
@@ -136,69 +153,10 @@ public class PlayerScript : NetworkBehaviour
             // Make Own GameObjects invisible
             invisibleToSelf.ForEach(go => go.SetActive(false));
         }
-        else
-        {
-
-        }
-
-        if (isServer)
-        {
-
-        }
-        else
-        {
-            SetCursorVisible(false);
-        }
     }
     #endregion NetworkBehaviour Callbacks
 
-    #region Commands
-    [Command]
-    public void CmdChangeSelectedSlot(int newSelectedSlot)
-    {
-        if (newSelectedSlot < 0 || newSelectedSlot > slotCount)
-        {
-            return;
-        }
-
-        selectedSlotSynced = newSelectedSlot;
-    }
-
-    [Command]
-    public void CmdPickupItem(NetworkIdentity netId)
-    {
-        if (itemManager.TryGetItemByNetId(netId.netId, out var item) && !item.IsPickedUp)
-        {
-            byte slot = (byte)selectedSlotSynced;
-            if (slots[slot] is null)
-            {
-                netId.AssignClientAuthority(connectionToClient);
-                RpcPickedUpItem(netId.netId, slot);
-            }
-        }
-    }
-    [Command]
-    public void CmdDropItem(NetworkIdentity netId, Vector3 dropVector)
-    {
-        if (itemManager.TryGetItemByNetId(netId.netId, out var item))
-        {
-            for (int i = 0; i < slotCount; i++)
-            {
-                Item slot = slots[i];
-                if (slot is null)
-                {
-                    continue;
-                }
-                if (slot.netId == netId.netId)
-                {
-                    RpcDroppedItem(netId.netId, (byte)i, dropVector);
-                    netId.RemoveClientAuthority();
-                    break;
-                }
-            }
-        }
-    }
-
+    #region Punch
     [Command]
     public void CmdPunch(uint netId)
     {
@@ -213,41 +171,124 @@ public class PlayerScript : NetworkBehaviour
             }
         }
     }
-    #endregion Commands
 
-    #region Client RPCs
     [ClientRpc]
     public void RpcPunch(Vector3 force)
     {
         if (manager.TimeSinceStart >= punchableTime)
         {
-            punchableTime = manager.TimeSinceStart + punchCooldown;
+            punchableTime = manager.TimeSinceStart + punchCooldownTime;
             punchVelocity += force;
         }
     }
+    #endregion Punch
+
+    #region Slot
+    // Add server confirming slot changes, client makes sure server has confirmed slot change before doing any interactions
+    // ^^ Dont queue
+    #endregion Slot
+
+    #region Pickup
+    [Command]
+    public void CmdPickupItem(uint netId)
+    {
+        if (itemManager.TryGetItemByNetId(netId, out var item) && !item.IsPickedUp)
+        {
+            byte slot = (byte)selectedSlotSynced;
+            if (slots[slot] is null)
+            {
+                // Possible lerp from origin fix????
+                //item.networkTransform.RpcTeleport(grip.transform.position);
+                item.netIdentity.AssignClientAuthority(connectionToClient);
+                if (isServerOnly)
+                {
+                    SharedPickupItem(item, slot);
+                }
+                RpcPickupItem(netId, slot);
+            }
+        }
+    }
+
     [ClientRpc]
-    public void RpcPickedUpItem(uint netId, byte slot)
+    public void RpcPickupItem(uint netId, byte slot)
     {
         if (itemManager.TryGetItemByNetId(netId, out var item))
         {
-            item.transform.SetParent(grip.transform);
-            item.transform.localPosition = Vector3.zero;
-
-            slots[slot] = item;
-            item.PickupInternal();
+            SharedPickupItem(item, slot);
         }
     }
-    [ClientRpc]
-    public void RpcDroppedItem(uint netId, byte slot, Vector3 dropVector)
+
+    private void SharedPickupItem(Item item, byte slot)
+    {
+        item.transform.SetParent(grip.transform);
+        item.transform.localPosition = Vector3.zero;
+
+        slots[slot] = item;
+        item.PickupInternal();
+    }
+    #endregion Pickup
+
+    #region Drop
+    [Command]
+    public void CmdDropItem(uint netId, Vector3 dropVector)
     {
         if (itemManager.TryGetItemByNetId(netId, out var item))
         {
-            itemManager.DroppedItem(item);
+            for (int i = 0; i < slotCount; i++)
+            {
+                Item slot = slots[i];
+                if (slot is null)
+                {
+                    continue;
+                }
 
-            slots[slot] = null;
-            item.DropInternal(dropVector);
+                if (slot.netId == netId)
+                {
+                    byte slotIndex = (byte)i;
+                    if (isServerOnly)
+                    {
+                        SharedDropItem(item, slotIndex, dropVector);
+                    }
+                    RpcDropItem(netId, slotIndex, dropVector);
+                    item.netIdentity.RemoveClientAuthority();
+                    break;
+                }
+            }
         }
     }
+
+    [ClientRpc]
+    public void RpcDropItem(uint netId, byte slot, Vector3 dropVector)
+    {
+        if (itemManager.TryGetItemByNetId(netId, out var item))
+        {
+            SharedDropItem(item, slot, dropVector);
+        }
+    }
+
+    private void SharedDropItem(Item item, byte slot, Vector3 dropVector)
+    {
+        item.transform.SetParent(itemManager.itemsTransform);
+
+        slots[slot] = null;
+        item.DropInternal(dropVector, velocity);
+    }
+    #endregion Drop
+
+    #region Commands
+    [Command]
+    public void CmdChangeSelectedSlot(int newSelectedSlot)
+    {
+        if (newSelectedSlot < 0 || newSelectedSlot > slotCount)
+        {
+            return;
+        }
+
+        selectedSlotSynced = newSelectedSlot;
+    }
+    #endregion Commands
+
+    #region Client RPCs
     #endregion Client RPCs
 
     #region Private

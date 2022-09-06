@@ -302,9 +302,9 @@ MonoBehaviour:
   momentumLerp: 0.8
   punchDrag: 2
   punchForce: 8
-  punchCooldown: 1
+  punchCooldownTime: 1
   reachDistance: 3
-  slotCount: 1
+  slotCount: 3
   selectedSlotSynced: 0
 --- !u!114 &5122590985792611329
 MonoBehaviour:

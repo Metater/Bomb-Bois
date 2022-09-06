@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class Item : NetworkBehaviour
 {
-    [SerializeField] private NetworkTransform networkTransform;
+    public NetworkTransform networkTransform;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private float dropForce;
 
@@ -19,12 +19,12 @@ public abstract class Item : NetworkBehaviour
         rb.angularVelocity = Vector3.zero;
     }
     public abstract void Pickup();
-    public void DropInternal(Vector3 dropVector)
+    public void DropInternal(Vector3 dropVector, Vector3 velocity)
     {
         IsPickedUp = false;
         rb.useGravity = true;
         rb.detectCollisions = true;
-        rb.AddForce(dropVector * dropForce, ForceMode.Impulse);
+        rb.AddForce((dropVector * dropForce) + velocity, ForceMode.Impulse);
     }
     public abstract void Drop();
     public abstract void Select();

@@ -12,8 +12,11 @@ public class ItemManager : NetworkBehaviour
 
     // Pass authority: https://mirror-networking.gitbook.io/docs/guides/authority
 
-    [SerializeField] private List<Item> items;
-    [SerializeField] private Transform itemsTransform;
+    // Public Set Unity References
+    public Transform itemsTransform;
+
+    // Private
+    private List<Item> items;
 
     private void Awake()
     {
@@ -24,10 +27,5 @@ public class ItemManager : NetworkBehaviour
     {
         item = items.Find(i => i.netId == netId);
         return item != null;
-    }
-
-    public void DroppedItem(Item item)
-    {
-        item.transform.SetParent(itemsTransform);
     }
 }
