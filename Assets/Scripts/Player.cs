@@ -353,6 +353,47 @@ public class Player : NetworkBehaviour
     {
         return manager.TimeSinceStart >= punchableAgainTime;
     }
+
+        private Vector3 GetPunchVelocity()
+    {
+        if (punchVector == Vector2.zero)
+        {
+            return Vector3.zero;
+        }
+
+        float timeSincePunch = (float)(manager.TimeSinceStart - punchTime);
+
+        if (timeSincePunch > punchLerpVelocityToZeroStartTime)
+        {
+            timeSincePunch = punchLerpVelocityToZeroStartTime;
+        }
+
+        float GetAxialPunchVelocity(float force)
+        {
+            return force * Mathf.Pow(1 - (punchDrag * 0.02f), 50 * timeSincePunch);
+        }
+
+        float x = GetAxialPunchVelocity(punchVector.x * punchForce);
+        float z = GetAxialPunchVelocity(punchVector.y * punchForce);
+
+        if (timeSincePunch < punchLerpVelocityToZeroStartTime)
+        {
+
+        }
+        else if (timeSincePunch >= punchLerpVelocityToZeroStartTime && timeSincePunch < punchLerpVelocityToZeroEndTime)
+        {
+            float step = (timeSincePunch - punchLerpVelocityToZeroStartTime) / (punchLerpVelocityToZeroEndTime - punchLerpVelocityToZeroStartTime);
+            x = Mathf.Lerp(x, 0, step);
+            z = Mathf.Lerp(z, 0, step);
+        }
+        else
+        {
+            punchVector = Vector2.zero;
+            return Vector3.zero;
+        }
+
+        return new Vector3(x, 0, z);
+    }
     #endregion Punch
 
     #region Move
@@ -393,47 +434,6 @@ public class Player : NetworkBehaviour
             transform.position = new Vector3(0, 25, 0);
             moveVelocity.y = 0f;
         }
-    }
-
-    private Vector3 GetPunchVelocity()
-    {
-        if (punchVector == Vector2.zero)
-        {
-            return Vector3.zero;
-        }
-
-        float timeSincePunch = (float)(manager.TimeSinceStart - punchTime);
-
-        if (timeSincePunch > punchLerpVelocityToZeroStartTime)
-        {
-            timeSincePunch = punchLerpVelocityToZeroStartTime;
-        }
-
-        float GetAxialPunchVelocity(float force)
-        {
-            return force * Mathf.Pow(1 - (punchDrag * 0.02f), 50 * timeSincePunch);
-        }
-
-        float x = GetAxialPunchVelocity(punchVector.x * punchForce);
-        float z = GetAxialPunchVelocity(punchVector.y * punchForce);
-
-        if (timeSincePunch < punchLerpVelocityToZeroStartTime)
-        {
-
-        }
-        else if (timeSincePunch >= punchLerpVelocityToZeroStartTime && timeSincePunch < punchLerpVelocityToZeroEndTime)
-        {
-            float step = (timeSincePunch - punchLerpVelocityToZeroStartTime) / (punchLerpVelocityToZeroEndTime - punchLerpVelocityToZeroStartTime);
-            x = Mathf.Lerp(x, 0, step);
-            z = Mathf.Lerp(z, 0, step);
-        }
-        else
-        {
-            punchVector = Vector2.zero;
-            return Vector3.zero;
-        }
-
-        return new Vector3(x, 0, z);
     }
     #endregion Move
 

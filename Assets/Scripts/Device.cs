@@ -4,6 +4,7 @@ public class Device : NetworkBehaviour
     private GameManager manager;
     [Header("Shockwave")]
     [SerializeField] private Transform shockwave;
+    [SerializeField] private float shockwaveMaxScale;
     [SerializeField] private float shockwaveTime;
     private bool isActivated = false;
     private float shockwaveStartTime;
@@ -11,16 +12,20 @@ public class Device : NetworkBehaviour
     private void Awake()
     {
         manager = FindObjectOfType<GameManager>(true);
+
+        shockwave.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        if (!isServer)
+        if (!isServer || isActivated)
         {
             return;
         }
 
-
+        float shockwaveStep = (manager.TimeSinceStart - shockwaveStartTime) / shockwaveTime;
+        float shockwaveScale = Mathf.Lerp(0, shockwaveMaxScale, shockwaveStep);
+        shockwave.localScale = new Vector3(shockwaveScale, shockwaveScale, shockwaveScale);
     }
 
     #region Activation
