@@ -1,3 +1,6 @@
+using Mirror;
+using UnityEngine;
+
 public class Device : NetworkBehaviour
 {
     [Header("General")]
@@ -5,9 +8,9 @@ public class Device : NetworkBehaviour
     [Header("Shockwave")]
     [SerializeField] private Transform shockwave;
     [SerializeField] private float shockwaveMaxScale;
-    [SerializeField] private float shockwaveTime;
+    [SerializeField] private double shockwaveTime;
     private bool isActivated = false;
-    private float shockwaveStartTime;
+    private double shockwaveStartTime;
 
     private void Awake()
     {
@@ -23,7 +26,7 @@ public class Device : NetworkBehaviour
             return;
         }
 
-        float shockwaveStep = (manager.TimeSinceStart - shockwaveStartTime) / shockwaveTime;
+        float shockwaveStep = (float)((manager.TimeSinceStart - shockwaveStartTime) / shockwaveTime);
         float shockwaveScale = Mathf.Lerp(0, shockwaveMaxScale, shockwaveStep);
         shockwave.localScale = new Vector3(shockwaveScale, shockwaveScale, shockwaveScale);
     }
