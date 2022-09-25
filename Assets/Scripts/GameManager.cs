@@ -9,6 +9,7 @@ public class GameManager : NetworkBehaviour
 {
     // Public Set Unity References
     public Image crosshairImage;
+    public PhoneManager phoneManager;
 
     // Private Set Unity References
     [SerializeField] private GameObject startButtonGO;
@@ -17,6 +18,7 @@ public class GameManager : NetworkBehaviour
     public bool HasStarted { get; private set; } = false;
     public double StartTime { get; private set; }
     public double StartNetworkTime { get; private set; }
+    public PlayerOld LocalPlayer { get; private set; }
 
     // Public Method Properties
     public double TimeSinceStart => Time.timeAsDouble - StartTime;
@@ -67,4 +69,25 @@ public class GameManager : NetworkBehaviour
         OnButtonStartPressed?.Invoke();
     }
     #endregion Buttons
+
+    public void InitLocalPlayer(PlayerOld localPlayer)
+    {
+        LocalPlayer = localPlayer;
+    }
+
+    public bool TryGetPlayerWithNetId(uint netId, out PlayerOld player)
+    {
+        // TODO IMPROVE EFF????
+        PlayerOld[] players = FindObjectsOfType<PlayerOld>();
+        foreach (var p in players)
+        {
+            if (p.netId == netId)
+            {
+                player = p;
+                return true;
+            }
+        }
+        player = null;
+        return false;
+    }
 }
