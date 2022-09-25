@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 419259823955123667}
   - component: {fileID: 4024227999121082740}
   m_Layer: 6
-  m_Name: Old Player
+  m_Name: Z Old Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -306,6 +306,8 @@ MonoBehaviour:
   reachDistance: 3
   slotCount: 3
   selectedSlotSynced: 0
+  lastPosition: {x: 0, y: 0, z: 0}
+  velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &5122590985792611329
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -301,12 +301,12 @@ public class PlayerScript : NetworkBehaviour
     {
         if (oldSelectedSlot >= 0 && oldSelectedSlot < slotCount && slots[oldSelectedSlot] != null)
         {
-            slots[oldSelectedSlot].Deselect();
+            slots[oldSelectedSlot].DeselectInternal();
         }
 
         if (newSelectedSlot >= 0 && newSelectedSlot < slotCount && slots[newSelectedSlot] != null)
         {
-            slots[newSelectedSlot].Select();
+            slots[newSelectedSlot].SelectInternal();
         }
     }
 

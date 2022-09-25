@@ -237,11 +237,12 @@ GameObject:
   - component: {fileID: 5122590985792611391}
   - component: {fileID: 1718064819950168165}
   - component: {fileID: 4984301324165783281}
+  - component: {fileID: 111003247407461810}
   - component: {fileID: 419259823955123667}
   - component: {fileID: 4024227999121082740}
   - component: {fileID: 5122590985792611329}
-  - component: {fileID: 5122590985792611328}
-  - component: {fileID: 2317994395418420856}
+  - component: {fileID: 3722771011730557049}
+  - component: {fileID: 5084234810479802166}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -282,6 +283,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   playerMovement: {fileID: 4984301324165783281}
+  playerInteraction: {fileID: 111003247407461810}
   playerAudio: {fileID: 0}
   invisibleToSelf:
   - {fileID: 8926713828310224535}
@@ -313,6 +315,29 @@ MonoBehaviour:
   moveSmoothTime: 0.01
   lookSpeed: 2
   lookXLimit: 90
+  velocityAveragingQueueSize: 0
+--- !u!114 &111003247407461810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122590985792611390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b2dc1b72d5db72449971caea5b9d537, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  player: {fileID: 1718064819950168165}
+  gripTransform: {fileID: 8926713826990989938}
+  reachDistance: 3
+  itemSmoothTime: 0
+  itemRotationSlerpMultiplier: 20
+  selectedSlotSynced: 0
+  crosshairDefaultColor: {r: 1, g: 1, b: 1, a: 0.49803922}
+  crosshairHoverItemColor: {r: 0.20392157, g: 0.5647059, b: 0.8117647, a: 0.49803922}
 --- !u!143 &419259823955123667
 CharacterController:
   m_ObjectHideFlags: 0
@@ -362,7 +387,7 @@ MonoBehaviour:
   visible: 0
   m_AssetId: e2a01f4c69dc15f4ca4b05c170f16f62
   hasSpawned: 0
---- !u!114 &5122590985792611328
+--- !u!114 &3722771011730557049
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -377,26 +402,29 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   clientAuthority: 1
-  sendInterval: 0.05
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 0
-  bufferTimeMultiplier: 3
+  sendRate: 30
+  bufferTimeMultiplier: 2
   bufferSizeLimit: 64
-  catchupThreshold: 6
-  catchupMultiplier: 0.1
+  catchupNegativeThreshold: -1
+  catchupPositiveThreshold: 1
+  catchupSpeed: 0.01
+  slowdownSpeed: 0.01
+  driftEmaDuration: 1
+  dynamicAdjustment: 1
+  dynamicAdjustmentTolerance: 1
+  deliveryTimeEmaDuration: 2
   onlySyncOnChange: 1
   bufferResetMultiplier: 5
   positionSensitivity: 0.01
   rotationSensitivity: 0.01
   scaleSensitivity: 0.01
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
---- !u!114 &2317994395418420856
+--- !u!114 &5084234810479802166
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -411,22 +439,25 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   clientAuthority: 1
-  sendInterval: 0.05
-  syncPosition: 0
-  syncRotation: 1
-  syncScale: 0
-  interpolatePosition: 0
-  interpolateRotation: 1
-  interpolateScale: 0
-  bufferTimeMultiplier: 3
+  sendRate: 30
+  bufferTimeMultiplier: 2
   bufferSizeLimit: 64
-  catchupThreshold: 6
-  catchupMultiplier: 0.1
+  catchupNegativeThreshold: -1
+  catchupPositiveThreshold: 1
+  catchupSpeed: 0.01
+  slowdownSpeed: 0.01
+  driftEmaDuration: 1
+  dynamicAdjustment: 1
+  dynamicAdjustmentTolerance: 1
+  deliveryTimeEmaDuration: 2
   onlySyncOnChange: 1
   bufferResetMultiplier: 5
   positionSensitivity: 0.01
   rotationSensitivity: 0.01
   scaleSensitivity: 0.01
+  syncPosition: 0
+  syncRotation: 1
+  syncScale: 0
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}

@@ -28,19 +28,41 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] private float lookSpeed;
     [SerializeField] private float lookXLimit;
     private float rotationX = 0;
+    [Header("Velocity Calculation")]
+    [SerializeField] private int velocityAveragingQueueSize;
+    private Vector3 lastPosition = Vector3.zero;
+    public Vector3 Velocity { get; private set; } = Vector3.zero;
+    private Queue<Vector3> velocities;
     #endregion Fields
 
     #region Player Callbacks
     public void PlayerAwake()
     {
         manager = FindObjectOfType<GameManager>(true);
+
+        velocities = new();
     }
     public void PlayerStart()
     {
-
+        lastPosition = transform.position;
     }
     public void PlayerUpdate()
     {
+        #region Update Velocity Calculation
+        Vector3 rawVelocity = (transform.position - lastPosition) / Time.deltaTime;
+        lastPosition = transform.position;
+        velocities.Enqueue(rawVelocity);
+        while (velocities.Count > velocityAveragingQueueSize)
+        {
+            velocities.Dequeue();
+        }
+        Velocity = Vector3.zero;
+        foreach (Vector3 v in velocities)
+        {
+            Velocity += v;
+        }
+        #endregion Update Velocity Calculation
+
         if (!isLocalPlayer || !manager.HasStarted)
         {
             return;

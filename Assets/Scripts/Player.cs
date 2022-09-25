@@ -36,14 +36,17 @@ public class Player : NetworkBehaviour
         manager = FindObjectOfType<GameManager>(true);
 
         playerMovement.PlayerAwake();
+        playerInteraction.PlayerAwake();
     }
     private void Start()
     {
         playerMovement.PlayerStart();
+        playerInteraction.PlayerStart();
     }
     private void Update()
     {
         playerMovement.PlayerUpdate();
+        playerInteraction.PlayerUpdate();
     }
     #endregion Unity Callbacks
 }

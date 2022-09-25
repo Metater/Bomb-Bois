@@ -3,9 +3,11 @@ using UnityEngine;
 
 public abstract class Item : NetworkBehaviour
 {
-    public NetworkTransform networkTransform;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private float dropForce;
+    [SerializeField] private GameObject modelGameObject;
+
+    [System.NonSerialized] public Vector3 smoothDampVelocity = Vector3.zero;
 
     public bool IsPickedUp { get; private set; } = false;
 
@@ -17,18 +19,30 @@ public abstract class Item : NetworkBehaviour
         rb.detectCollisions = false;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+        smoothDampVelocity = Vector3.zero;
     }
-    public abstract void Pickup();
+    protected abstract void Pickup();
     public void DropInternal(Vector3 dropVector, Vector3 velocity)
     {
         IsPickedUp = false;
         rb.useGravity = true;
         rb.detectCollisions = true;
+        // TODO messes with sync? could have no authority, hasAuthority check????
         rb.AddForce((dropVector * dropForce) + velocity, ForceMode.Impulse);
     }
-    public abstract void Drop();
-    public abstract void Select();
-    public abstract void Deselect();
-    public abstract void LeftClick();
-    public abstract void RightClick();
+    protected abstract void Drop();
+    public void SelectInternal()
+    {
+        modelGameObject.SetActive(true);
+        Select();
+    }
+    protected abstract void Select();
+    public void DeselectInternal()
+    {
+        modelGameObject.SetActive(false);
+        Deselect();
+    }
+    protected abstract void Deselect();
+    protected abstract void LeftClick();
+    protected abstract void RightClick();
 }

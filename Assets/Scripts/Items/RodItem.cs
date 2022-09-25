@@ -2,27 +2,27 @@ using Mirror;
 
 public class RodItem : Item
 {
-    public override void Pickup()
+    protected override void Pickup()
     {
 
     }
-    public override void Drop()
+    protected override void Drop()
     {
 
     }
-    public override void Select()
+    protected override void Select()
     {
 
     }
-    public override void Deselect()
+    protected override void Deselect()
     {
 
     }
-    public override void LeftClick()
+    protected override void LeftClick()
     {
 
     }
-    public override void RightClick()
+    protected override void RightClick()
     {
 
     }

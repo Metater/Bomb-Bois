@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class PhoneManager : NetworkBehaviour
+public class PhoneManager : MonoBehaviour
 {
     private GameManager manager;
 
