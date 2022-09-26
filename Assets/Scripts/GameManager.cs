@@ -10,6 +10,8 @@ public class GameManager : NetworkBehaviour
     // Public Set Unity References
     public Image crosshairImage;
     public PhoneManager phoneManager;
+    public GameObject draggableIndicator;
+    public GameObject indicator;
 
     // Private Set Unity References
     [SerializeField] private GameObject startButtonGO;

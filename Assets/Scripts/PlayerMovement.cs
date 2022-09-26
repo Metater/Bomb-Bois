@@ -48,6 +48,11 @@ public class PlayerMovement : NetworkBehaviour
     }
     public void PlayerUpdate()
     {
+        if (!isLocalPlayer || !manager.HasStarted)
+        {
+            return;
+        }
+
         #region Update Velocity Calculation
         Vector3 rawVelocity = (transform.position - lastPosition) / Time.deltaTime;
         lastPosition = transform.position;
@@ -61,12 +66,8 @@ public class PlayerMovement : NetworkBehaviour
         {
             Velocity += v;
         }
+        Velocity /= velocities.Count;
         #endregion Update Velocity Calculation
-
-        if (!isLocalPlayer || !manager.HasStarted)
-        {
-            return;
-        }
 
         #region Update Movement Speeds
         bool isRunning = Input.GetKey(KeyCode.LeftShift);

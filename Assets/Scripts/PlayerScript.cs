@@ -268,7 +268,7 @@ public class PlayerScript : NetworkBehaviour
 
     private void SharedDropItem(Item item, byte slot, Vector3 dropVector)
     {
-        item.transform.SetParent(itemManager.itemsTransform);
+        //item.transform.SetParent(itemManager.itemsTransform);
 
         slots[slot] = null;
         item.DropInternal(dropVector, velocity);

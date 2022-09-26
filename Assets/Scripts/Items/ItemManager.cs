@@ -13,14 +13,15 @@ public class ItemManager : NetworkBehaviour
     // Pass authority: https://mirror-networking.gitbook.io/docs/guides/authority
 
     // Public Set Unity References
-    public Transform itemsTransform;
+    //public Transform itemsTransform;
 
     // Private
     private List<Item> items;
 
     private void Awake()
     {
-        items = new List<Item>(itemsTransform.GetComponentsInChildren<Item>(true));
+        items = new List<Item>(FindObjectsOfType<Item>(true));
+        //items = new List<Item>(itemsTransform.GetComponentsInChildren<Item>(true));
     }
 
     public bool TryGetItemByNetId(uint netId, out Item item)

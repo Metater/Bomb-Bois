@@ -315,7 +315,7 @@ MonoBehaviour:
   moveSmoothTime: 0.01
   lookSpeed: 2
   lookXLimit: 90
-  velocityAveragingQueueSize: 0
+  velocityAveragingQueueSize: 3
 --- !u!114 &111003247407461810
 MonoBehaviour:
   m_ObjectHideFlags: 0

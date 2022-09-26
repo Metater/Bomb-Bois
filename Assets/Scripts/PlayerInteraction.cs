@@ -10,6 +10,7 @@ public class PlayerInteraction : NetworkBehaviour
     [Header("General")]
     private GameManager manager;
     private ItemManager itemManager;
+    private DraggableManager draggableManager;
     [SerializeField] private Player player;
     [Header("Transforms")]
     [SerializeField] private Transform gripTransform;
@@ -21,6 +22,8 @@ public class PlayerInteraction : NetworkBehaviour
     private Item[] slots;
     [SyncVar(hook = nameof(OnSlotChanged))]
     public int selectedSlotSynced = 0;
+    private Draggable currentDraggable = null;
+    private float currentDraggableDistance = 0;
     [Header("Crosshair Colors")]
     [SerializeField] private Color crosshairDefaultColor;
     [SerializeField] private Color crosshairHoverItemColor;
@@ -31,6 +34,7 @@ public class PlayerInteraction : NetworkBehaviour
     {
         manager = FindObjectOfType<GameManager>(true);
         itemManager = FindObjectOfType<ItemManager>(true);
+        draggableManager = FindObjectOfType<DraggableManager>(true);
 
         slots = new Item[3];
     }
@@ -47,11 +51,12 @@ public class PlayerInteraction : NetworkBehaviour
 
         Item selectedItem = slots[selectedSlotLocal];
 
+        bool isDragging = false;
         Color crosshairColor = crosshairDefaultColor;
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        if (Physics.Raycast(ray, out var hit, reachDistance))
+        if (selectedItem is null && Physics.Raycast(ray, out var hit, reachDistance))
         {
-            if (hit.transform.gameObject.TryGetComponent<Item>(out var item) && !item.IsPickedUp && selectedItem is null)
+            if (hit.transform.gameObject.TryGetComponent<Item>(out var item) && !item.IsPickedUp)
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
@@ -59,8 +64,55 @@ public class PlayerInteraction : NetworkBehaviour
                 }
                 crosshairColor = crosshairHoverItemColor;
             }
+            else
+            {
+                Draggable draggable = hit.transform.gameObject.GetComponentInParent<Draggable>();
+                if (draggable is not null)
+                {
+                    manager.draggableIndicator.transform.position = hit.point;
+
+                    isDragging = true;
+
+                    if (Input.GetMouseButton(0))
+                    {
+                        if (!draggable.isBeingDrug && currentDraggable is null)
+                        {
+                            // begin drag
+                            // TODO IS THIS REPEATEDLY CALLED????!??!?!?
+                            CmdBeginDrag(draggable.netId, hit.distance);
+                        }
+                        else if (currentDraggable is not null)
+                        {
+                            // take into account original click point, use that somehow, you need to
+
+                            // continue drag
+                            Vector3 draggablePosition = draggable.transform.position;
+                            Vector3 draggableDragPosition = hit.point; // here???????
+                            Vector3 desiredDragPosition = Camera.main.transform.position + (Camera.main.transform.forward * currentDraggableDistance);
+                            Vector3 point = (draggableDragPosition - draggablePosition) + desiredDragPosition;
+                            manager.indicator.transform.position = point;
+                            draggable.AddForceTowardsPoint(point);
+                        }
+                    }
+                }
+            }
         }
         manager.crosshairImage.color = crosshairColor;
+        if (!isDragging)
+        {
+            manager.draggableIndicator.SetActive(false);
+            manager.indicator.SetActive(false);
+
+            if (currentDraggable is not null)
+            {
+                // TODO STOP DRAGGING!       *(*(DASY*(D*(ASY((DSAY*(YDA
+            }
+        }
+        else
+        {
+            manager.draggableIndicator.SetActive(true);
+            manager.indicator.SetActive(true);
+        }
 
         UpdateSlot();
 
@@ -68,7 +120,7 @@ public class PlayerInteraction : NetworkBehaviour
         {
             if (Input.GetKeyDown(KeyCode.G) && selectedSlotLocal == selectedSlotSynced)
             {
-                CmdDropItem(selectedItem.netId, Camera.main.transform.forward);
+                CmdDropItem(selectedItem.netId, Camera.main.transform.forward, player.playerMovement.Velocity);
             }
         }
 
@@ -84,6 +136,40 @@ public class PlayerInteraction : NetworkBehaviour
         }
     }
     #endregion Player Callbacks
+
+    #region Dragging
+    [Command]
+    public void CmdBeginDrag(uint netId, float distance)
+    {
+        if (draggableManager.TryGetDraggableByNetId(netId, out var draggable)
+            && !draggable.isBeingDrug
+            && draggable.netIdentity.connectionToClient is null)
+        {
+            draggable.netIdentity.AssignClientAuthority(connectionToClient);
+            draggable.BeginDrag();
+            RpcBeginDrag(netId, distance);
+        }
+    }
+    [ClientRpc]
+    public void RpcBeginDrag(uint netId, float distance)
+    {
+        if (draggableManager.TryGetDraggableByNetId(netId, out var draggable))
+        {
+            currentDraggable = draggable;
+            currentDraggableDistance = distance;
+        }
+    }
+    [Command]
+    public void CmdEndDrag(uint netId)
+    {
+        if (draggableManager.TryGetDraggableByNetId(netId, out var draggable)
+            && draggable.isBeingDrug
+            && draggable.netIdentity.connectionToClient is not null)
+        {
+            draggable.netIdentity.RemoveClientAuthority();
+        }
+    }
+    #endregion Dragging
 
     #region Slot
     private void OnSlotChanged(int oldSelectedSlot, int newSelectedSlot)
@@ -201,7 +287,7 @@ public class PlayerInteraction : NetworkBehaviour
 
     #region Drop
     [Command]
-    public void CmdDropItem(uint netId, Vector3 dropVector)
+    public void CmdDropItem(uint netId, Vector3 dropVector, Vector3 velocity)
     {
         if (itemManager.TryGetItemByNetId(netId, out var item))
         {
@@ -217,9 +303,9 @@ public class PlayerInteraction : NetworkBehaviour
                 {
                     if (isServerOnly)
                     {
-                        SharedDropItem(item, i, dropVector);
+                        SharedDropItem(item, i, dropVector, velocity);
                     }
-                    RpcDropItem(netId, i, dropVector);
+                    RpcDropItem(netId, i, dropVector, velocity);
                     //item.netIdentity.RemoveClientAuthority();
                     break;
                 }
@@ -228,18 +314,18 @@ public class PlayerInteraction : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void RpcDropItem(uint netId, int slot, Vector3 dropVector)
+    public void RpcDropItem(uint netId, int slot, Vector3 dropVector, Vector3 velocity)
     {
         if (itemManager.TryGetItemByNetId(netId, out var item))
         {
-            SharedDropItem(item, slot, dropVector);
+            SharedDropItem(item, slot, dropVector, velocity);
         }
     }
 
-    private void SharedDropItem(Item item, int slot, Vector3 dropVector)
+    private void SharedDropItem(Item item, int slot, Vector3 dropVector, Vector3 velocity)
     {
         slots[slot] = null;
-        item.DropInternal(dropVector, player.playerMovement.Velocity);
+        item.DropInternal(dropVector, velocity);
     }
     #endregion Drop
 }
