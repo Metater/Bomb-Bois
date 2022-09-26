@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+    Items will be deleted when client that last touched them disconnects, not good
+*/
+
 public class GameManager : NetworkBehaviour
 {
     // Public Set Unity References
@@ -12,6 +16,9 @@ public class GameManager : NetworkBehaviour
     public PhoneManager phoneManager;
     public GameObject draggableIndicator;
     public GameObject indicator;
+
+    // Lookup
+    public NetRefLookup<Player>
 
     // Private Set Unity References
     [SerializeField] private GameObject startButtonGO;

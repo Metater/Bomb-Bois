@@ -248,6 +248,7 @@ public class PlayerInteraction : NetworkBehaviour
             int slot = selectedSlotSynced;
             if (slots[slot] is null)
             {
+                // Unnessarily removes and reassigns client authority when client picks up same item 2 times in a row
                 if (item.netIdentity.connectionToClient is not null)
                 {
                     item.netIdentity.RemoveClientAuthority();
