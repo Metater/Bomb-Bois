@@ -14,12 +14,15 @@ public class PlayerInteraction : NetworkBehaviour
     [SerializeField] private Transform gripTransform;
     [Header("Interaction")]
     [SerializeField] private float reachDistance;
+    // TODO item should be smoothed relative to player body position???
+    // TODO It would probably look more smooth then
     [SerializeField] private float itemSmoothTime;
+    // TODO is there a better way to do this?
     [SerializeField] private float itemRotationSlerpMultiplier;
-    private int selectedSlotLocal = 0;
     private Item[] slots;
-    [SyncVar(hook = nameof(OnSlotChanged))]
-    public int selectedSlotSynced = 0;
+    private int selectedSlotLocal = 0;
+    [SyncVar(hook = nameof(OnSlotChanged))] public int selectedSlotSynced = 0;
+    // TODO Drag logic will change
     private Draggable currentDraggable = null;
     private float currentDraggableDistance = 0;
     [Header("Crosshair Colors")]

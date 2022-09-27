@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class NetRefLookup<T> where T : NetworkBehaviour
 {
+    // Could use dictionary to optimize
+
     private readonly RefLookup<T> lookup = new();
 
     public List<T> Refs => lookup.Refs;

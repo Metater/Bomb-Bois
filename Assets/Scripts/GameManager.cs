@@ -18,9 +18,9 @@ public class GameManager : NetworkBehaviour
     public GameObject indicator;
 
     // Lookup
-    public NetRefLookup<Player> playerLookup;
-    public NetRefLookup<Draggable> draggableLookup;
-    public NetRefLookup<Item> itemLookup;
+    public NetRefLookup<Player> PlayerLookup { get; private set; }
+    public NetRefLookup<Draggable> DraggableLookup { get; private set; }
+    public NetRefLookup<Item> ItemLookup { get; private set; }
 
     // Private Set Unity References
     [SerializeField] private GameObject startButtonGO;
@@ -40,12 +40,12 @@ public class GameManager : NetworkBehaviour
     #region Unity
     private void Awake()
     {
-        playerLookup = new();
-        draggableLookup = new();
-        itemLookup = new();
+        PlayerLookup = new();
+        DraggableLookup = new();
+        ItemLookup = new();
 
-        draggableLookup.Refs.AddRange(FindObjectsOfType<Draggable>(true));
-        itemLookup.Refs.AddRange(FindObjectsOfType<Item>(true));
+        DraggableLookup.Refs.AddRange(FindObjectsOfType<Draggable>(true));
+        ItemLookup.Refs.AddRange(FindObjectsOfType<Item>(true));
     }
 
     private void Start()
@@ -86,7 +86,7 @@ public class GameManager : NetworkBehaviour
         HasStarted = true;
         StartTime = Time.timeAsDouble;
         StartNetworkTime = NetworkTime.time;
-        playerLookup.Refs.AddRange(FindObjectsOfType<Player>());
+        PlayerLookup.Refs.AddRange(FindObjectsOfType<Player>());
 
         OnButtonStartPressed?.Invoke();
     }
