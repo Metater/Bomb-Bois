@@ -40,6 +40,10 @@ public class GameManager : NetworkBehaviour
     #region Unity
     private void Awake()
     {
+        playerLookup = new();
+        draggableLookup = new();
+        itemLookup = new();
+
         draggableLookup.Refs.AddRange(FindObjectsOfType<Draggable>(true));
         itemLookup.Refs.AddRange(FindObjectsOfType<Item>(true));
     }
