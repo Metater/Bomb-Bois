@@ -7598,8 +7598,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1608524788}
   - component: {fileID: 1608524789}
-  - component: {fileID: 1608524791}
-  - component: {fileID: 1608524792}
   - component: {fileID: 1608524790}
   m_Layer: 0
   m_Name: Scripts
@@ -7659,34 +7657,6 @@ MonoBehaviour:
   visible: 2
   m_AssetId: 
   hasSpawned: 0
---- !u!114 &1608524791
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1608524787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d83dbd031327d384ea10c7b0d746a737, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
---- !u!114 &1608524792
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1608524787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37e32b7e508801449a0d2c6570ff1666, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
 --- !u!1 &1615981501
 GameObject:
   m_ObjectHideFlags: 0

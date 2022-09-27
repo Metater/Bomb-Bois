@@ -90,7 +90,7 @@ public class PhoneManager : MonoBehaviour
         {
             phoneNumber += index;
             DisplayPhoneNumber();
-            manager.LocalPlayer.CmdPlayAudioClipOnPlayer(index, manager.LocalPlayer.netId);
+            //manager.LocalPlayer.CmdPlayAudioClipOnPlayer(index, manager.LocalPlayer.netId);
         }
     }
     public void ButtonBackspace()
@@ -104,7 +104,7 @@ public class PhoneManager : MonoBehaviour
         {
             phoneNumber = phoneNumber[..(phoneNumber.Length - 1)];
             DisplayPhoneNumber();
-            manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
+            //manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
         }
     }
     public void ButtonTogglePower()
@@ -121,7 +121,7 @@ public class PhoneManager : MonoBehaviour
             DisplayStatusText("Enter a number...");
             DisplayPhoneNumber();
         }
-        manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
+        //manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
     }
     public void ButtonCall()
     {
@@ -130,7 +130,7 @@ public class PhoneManager : MonoBehaviour
             return;
         }
 
-        manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
+        //manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
     }
     public void ButtonEndCall()
     {
@@ -139,7 +139,7 @@ public class PhoneManager : MonoBehaviour
             return;
         }
 
-        manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
+        //manager.LocalPlayer.CmdPlayAudioClipOnPlayer(RandomButtonSoundIndex, manager.LocalPlayer.netId);
     }
     
     private void DisplayStatusText(string status)

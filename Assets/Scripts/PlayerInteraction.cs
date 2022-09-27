@@ -9,8 +9,6 @@ public class PlayerInteraction : NetworkBehaviour
     // References
     [Header("General")]
     private GameManager manager;
-    private ItemManager itemManager;
-    private DraggableManager draggableManager;
     [SerializeField] private Player player;
     [Header("Transforms")]
     [SerializeField] private Transform gripTransform;
@@ -33,8 +31,6 @@ public class PlayerInteraction : NetworkBehaviour
     public void PlayerAwake()
     {
         manager = FindObjectOfType<GameManager>(true);
-        itemManager = FindObjectOfType<ItemManager>(true);
-        draggableManager = FindObjectOfType<DraggableManager>(true);
 
         slots = new Item[3];
     }
@@ -243,7 +239,7 @@ public class PlayerInteraction : NetworkBehaviour
     [Command]
     public void CmdPickupItem(uint netId)
     {
-        if (itemManager.TryGetItemByNetId(netId, out var item) && !item.IsPickedUp)
+        if (manager.itemLookup.TryGetWithNetId(netId, out var item) && !item.IsPickedUp)
         {
             int slot = selectedSlotSynced;
             if (slots[slot] is null)
@@ -267,7 +263,7 @@ public class PlayerInteraction : NetworkBehaviour
     [ClientRpc]
     public void RpcPickupItem(uint netId, int slot)
     {
-        if (itemManager.TryGetItemByNetId(netId, out var item))
+        if (manager.itemLookup.TryGetWithNetId(netId, out var item))
         {
             SharedPickupItem(item, slot);
         }

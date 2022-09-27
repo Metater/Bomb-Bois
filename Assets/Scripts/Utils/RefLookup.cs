@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 public class RefLookup<T>
 {
     public List<T> Refs { get; private set; } = new();

@@ -1,4 +1,8 @@
-public class NetRefManager<T> where T : NetworkBehaviour
+using Mirror;
+using System;
+using System.Collections.Generic;
+
+public class NetRefLookup<T> where T : NetworkBehaviour
 {
     private readonly RefLookup<T> lookup = new();
 
