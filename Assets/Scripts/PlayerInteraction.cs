@@ -137,37 +137,7 @@ public class PlayerInteraction : NetworkBehaviour
     #endregion Player Callbacks
 
     #region Dragging
-    [Command]
-    public void CmdBeginDrag(uint netId, float distance)
-    {
-        if (draggableManager.TryGetDraggableByNetId(netId, out var draggable)
-            && !draggable.isBeingDrug
-            && draggable.netIdentity.connectionToClient is null)
-        {
-            draggable.netIdentity.AssignClientAuthority(connectionToClient);
-            draggable.BeginDrag();
-            RpcBeginDrag(netId, distance);
-        }
-    }
-    [ClientRpc]
-    public void RpcBeginDrag(uint netId, float distance)
-    {
-        if (draggableManager.TryGetDraggableByNetId(netId, out var draggable))
-        {
-            currentDraggable = draggable;
-            currentDraggableDistance = distance;
-        }
-    }
-    [Command]
-    public void CmdEndDrag(uint netId)
-    {
-        if (draggableManager.TryGetDraggableByNetId(netId, out var draggable)
-            && draggable.isBeingDrug
-            && draggable.netIdentity.connectionToClient is not null)
-        {
-            draggable.netIdentity.RemoveClientAuthority();
-        }
-    }
+
     #endregion Dragging
 
     #region Slot
@@ -242,7 +212,7 @@ public class PlayerInteraction : NetworkBehaviour
     [Command]
     public void CmdPickupItem(uint netId)
     {
-        if (manager.itemLookup.TryGetWithNetId(netId, out var item) && !item.IsPickedUp)
+        if (manager.ItemLookup.TryGetWithNetId(netId, out var item) && !item.IsPickedUp)
         {
             int slot = selectedSlotSynced;
             if (slots[slot] is null)
@@ -266,7 +236,7 @@ public class PlayerInteraction : NetworkBehaviour
     [ClientRpc]
     public void RpcPickupItem(uint netId, int slot)
     {
-        if (manager.itemLookup.TryGetWithNetId(netId, out var item))
+        if (manager.ItemLookup.TryGetWithNetId(netId, out var item))
         {
             SharedPickupItem(item, slot);
         }
@@ -289,7 +259,7 @@ public class PlayerInteraction : NetworkBehaviour
     [Command]
     public void CmdDropItem(uint netId, Vector3 dropVector, Vector3 velocity)
     {
-        if (itemManager.TryGetItemByNetId(netId, out var item))
+        if (manager.ItemLookup.TryGetWithNetId(netId, out var item))
         {
             for (int i = 0; i < 3; i++)
             {
@@ -316,7 +286,7 @@ public class PlayerInteraction : NetworkBehaviour
     [ClientRpc]
     public void RpcDropItem(uint netId, int slot, Vector3 dropVector, Vector3 velocity)
     {
-        if (itemManager.TryGetItemByNetId(netId, out var item))
+        if (manager.ItemLookup.TryGetWithNetId(netId, out var item))
         {
             SharedDropItem(item, slot, dropVector, velocity);
         }
