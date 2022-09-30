@@ -78,6 +78,8 @@ public class PlayerInteraction : NetworkBehaviour
                             Vector3 point = hit.point - draggable.transform.position;
                             // Where the heck does 0.3 come from and why does it help?
                             currentDrag = (draggable, point, hit.distance + 0.3f);
+                            manager.playerDragStartIndicator.SetActive(true);
+                            manager.playerDragStartIndicator.transform.position = hit.point;
                         }
                         else
                         {
@@ -98,6 +100,7 @@ public class PlayerInteraction : NetworkBehaviour
             if (currentDrag is null)
             {
                 manager.playerDragIndicator.SetActive(false);
+                manager.playerDragStartIndicator.SetActive(false);
             }
             else
             {
@@ -108,8 +111,10 @@ public class PlayerInteraction : NetworkBehaviour
                     manager.playerDragIndicator.SetActive(true);
                     manager.playerDragIndicator.transform.position = dragPoint;
 
-                    if (lastDraggerUpdateSentTime <= Time.timeAsDouble + (1d / draggerUpdateSendFrequency))
+                    // This method of slowing updates will be inaccurate, doesnt account for overflow!!!
+                    if (lastDraggerUpdateSentTime + (1d / draggerUpdateSendFrequency) <= Time.timeAsDouble)
                     {
+                        lastDraggerUpdateSentTime = Time.timeAsDouble;
                         Vector3 desiredPosition = Camera.main.transform.position + (Camera.main.transform.forward * currentDrag.Value.distance);
                         Vector3 target = desiredPosition - currentDrag.Value.point;
                         CmdUpdateDragger(currentDrag.Value.draggable.netId, currentDrag.Value.point, target);
@@ -121,6 +126,18 @@ public class PlayerInteraction : NetworkBehaviour
                     manager.playerDragIndicator.SetActive(false);
                 }
             }
+        }
+
+        if (currentDrag is null)
+        {
+            manager.playerDragStartIndicator.SetActive(false);
+            manager.playerDragLineIndicator.gameObject.SetActive(false);
+        }
+        else
+        {
+            manager.playerDragLineIndicator.gameObject.SetActive(true);
+            manager.playerDragLineIndicator.SetPosition(0, manager.playerDragStartIndicator.transform.position);
+            manager.playerDragLineIndicator.SetPosition(1, manager.playerDragIndicator.transform.position);
         }
 
         UpdateSlot();

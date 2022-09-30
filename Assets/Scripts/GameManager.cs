@@ -15,13 +15,12 @@ public class GameManager : NetworkBehaviour
     public Image crosshairImage;
     public PhoneManager phoneManager;
     public GameObject playerDragIndicator;
+    public GameObject playerDragStartIndicator;
+    public LineRenderer playerDragLineIndicator;
 
     [Header("Prefabs")]
 
     public GameObject otherPlayerDragIndicatorPrefab;
-    public GameObject indicator;
-
-    public RectTransform test;
 
 
     // Lookup
@@ -63,7 +62,12 @@ public class GameManager : NetworkBehaviour
 
     private void Update()
     {
-        double timeSinceStart = Time.timeAsDouble - StartTime;
+        double timeSinceStart = TimeSinceStart;
+
+        if (!isServer)
+        {
+            return;
+        }
     }
     #endregion Unity
 
