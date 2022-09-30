@@ -14,8 +14,15 @@ public class GameManager : NetworkBehaviour
     // Public Set Unity References
     public Image crosshairImage;
     public PhoneManager phoneManager;
-    public GameObject draggableIndicator;
+    public GameObject playerDragIndicator;
+
+    [Header("Prefabs")]
+
+    public GameObject otherPlayerDragIndicatorPrefab;
     public GameObject indicator;
+
+    public RectTransform test;
+
 
     // Lookup
     public NetRefLookup<Player> PlayerLookup { get; private set; }
@@ -32,6 +39,7 @@ public class GameManager : NetworkBehaviour
     public Player LocalPlayer { get; private set; }
 
     // Public Method Properties
+    // TODO Is this a bad thing???
     public double TimeSinceStart => Time.timeAsDouble - StartTime;
 
     // Public Events

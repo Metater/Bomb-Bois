@@ -13,6 +13,7 @@ public class Player : NetworkBehaviour
     public PlayerInteraction playerInteraction;
     public PlayerAudio playerAudio;
     [SerializeField] private List<GameObject> invisibleToSelf;
+    private bool isCursorVisible = false;
     #endregion Fields
 
     #region Mirror Callbacks
@@ -26,6 +27,8 @@ public class Player : NetworkBehaviour
 
             // Make own GameObjects invisible
             invisibleToSelf.ForEach(go => go.SetActive(false));
+
+            manager.InitLocalPlayer(this);
         }
     }
     #endregion Mirror Callbacks
@@ -37,6 +40,8 @@ public class Player : NetworkBehaviour
 
         playerMovement.PlayerAwake();
         playerInteraction.PlayerAwake();
+
+        UpdateCursorVisibility();
     }
     private void Start()
     {
@@ -47,6 +52,25 @@ public class Player : NetworkBehaviour
     {
         playerMovement.PlayerUpdate();
         playerInteraction.PlayerUpdate();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            isCursorVisible = !isCursorVisible;
+            UpdateCursorVisibility();
+        }
     }
     #endregion Unity Callbacks
+
+    private void UpdateCursorVisibility()
+    {
+        if (isCursorVisible)
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        Cursor.visible = isCursorVisible;
+    }
 }

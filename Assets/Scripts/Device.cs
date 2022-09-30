@@ -9,6 +9,7 @@ public class Device : NetworkBehaviour
     [SerializeField] private Transform shockwave;
     [SerializeField] private float shockwaveMaxScale;
     [SerializeField] private double shockwaveTime;
+    [SerializeField] private AudioSource activatedSound;
     private bool isActivated = false;
     private double shockwaveStartTime;
 
@@ -16,7 +17,7 @@ public class Device : NetworkBehaviour
     {
         manager = FindObjectOfType<GameManager>(true);
 
-        shockwave.gameObject.SetActive(false);
+        //shockwave.gameObject.SetActive(false);
     }
 
     private void Update()
@@ -26,9 +27,9 @@ public class Device : NetworkBehaviour
             return;
         }
 
-        float shockwaveStep = (float)((manager.TimeSinceStart - shockwaveStartTime) / shockwaveTime);
-        float shockwaveScale = Mathf.Lerp(0, shockwaveMaxScale, shockwaveStep);
-        shockwave.localScale = new Vector3(shockwaveScale, shockwaveScale, shockwaveScale);
+        //float shockwaveStep = (float)((manager.TimeSinceStart - shockwaveStartTime) / shockwaveTime);
+        //float shockwaveScale = Mathf.Lerp(0, shockwaveMaxScale, shockwaveStep);
+        //shockwave.localScale = new Vector3(shockwaveScale, shockwaveScale, shockwaveScale);
     }
 
     #region Activation
@@ -51,7 +52,18 @@ public class Device : NetworkBehaviour
     private void SharedHasBeenActivated()
     {
         isActivated = true;
-        shockwaveStartTime = manager.TimeSinceStart;
+        activatedSound.Play();
+        //shockwaveStartTime = manager.TimeSinceStart;
     }
     #endregion Activation
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!isServer)
+        {
+            return;
+        }
+
+        Activate();
+    }
 }

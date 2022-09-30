@@ -22,12 +22,15 @@ public class PlayerInteraction : NetworkBehaviour
     private Item[] slots;
     private int selectedSlotLocal = 0;
     [SyncVar(hook = nameof(OnSlotChanged))] public int selectedSlotSynced = 0;
-    // TODO Drag logic will change
-    private Draggable currentDraggable = null;
-    private float currentDraggableDistance = 0;
+    [Header("Dragging")]
+    [SerializeField] private float dragDistance;
+    [SerializeField] private double draggerUpdateSendFrequency;
+    private (Draggable draggable, Vector3 point, float distance)? currentDrag = null;
+    private double lastDraggerUpdateSentTime = -1;
     [Header("Crosshair Colors")]
     [SerializeField] private Color crosshairDefaultColor;
     [SerializeField] private Color crosshairHoverItemColor;
+    [SerializeField] private Color crosshairHoverDraggableColor;
     #endregion Fields
 
     #region Player Callbacks
@@ -50,7 +53,7 @@ public class PlayerInteraction : NetworkBehaviour
 
         Item selectedItem = slots[selectedSlotLocal];
 
-        bool isDragging = false;
+        bool shouldSkipCurrentDragLogic = false;
         Color crosshairColor = crosshairDefaultColor;
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (selectedItem is null && Physics.Raycast(ray, out var hit, reachDistance))
@@ -68,49 +71,56 @@ public class PlayerInteraction : NetworkBehaviour
                 Draggable draggable = hit.transform.gameObject.GetComponentInParent<Draggable>();
                 if (draggable is not null)
                 {
-                    manager.draggableIndicator.transform.position = hit.point;
-
-                    isDragging = true;
-
-                    if (Input.GetMouseButton(0))
+                    if (currentDrag is null)
                     {
-                        if (!draggable.isBeingDrug && currentDraggable is null)
+                        if (Input.GetMouseButtonDown(0))
                         {
-                            // begin drag
-                            // TODO IS THIS REPEATEDLY CALLED????!??!?!?
-                            CmdBeginDrag(draggable.netId, hit.distance);
+                            Vector3 point = hit.point - draggable.transform.position;
+                            // Where the heck does 0.3 come from and why does it help?
+                            currentDrag = (draggable, point, hit.distance + 0.3f);
                         }
-                        else if (currentDraggable is not null)
+                        else
                         {
-                            // take into account original click point, use that somehow, you need to
-
-                            // continue drag
-                            Vector3 draggablePosition = draggable.transform.position;
-                            Vector3 draggableDragPosition = hit.point; // here???????
-                            Vector3 desiredDragPosition = Camera.main.transform.position + (Camera.main.transform.forward * currentDraggableDistance);
-                            Vector3 point = (draggableDragPosition - draggablePosition) + desiredDragPosition;
-                            manager.indicator.transform.position = point;
-                            draggable.AddForceTowardsPoint(point);
+                            shouldSkipCurrentDragLogic = true;
+                            manager.playerDragIndicator.SetActive(true);
+                            manager.playerDragIndicator.transform.position = hit.point;
                         }
                     }
+
+                    crosshairColor = crosshairHoverDraggableColor;
                 }
             }
         }
         manager.crosshairImage.color = crosshairColor;
-        if (!isDragging)
-        {
-            manager.draggableIndicator.SetActive(false);
-            manager.indicator.SetActive(false);
 
-            if (currentDraggable is not null)
-            {
-                // TODO STOP DRAGGING!       *(*(DASY*(D*(ASY((DSAY*(YDA
-            }
-        }
-        else
+        if (!shouldSkipCurrentDragLogic)
         {
-            manager.draggableIndicator.SetActive(true);
-            manager.indicator.SetActive(true);
+            if (currentDrag is null)
+            {
+                manager.playerDragIndicator.SetActive(false);
+            }
+            else
+            {
+                Vector3 dragPoint = currentDrag.Value.draggable.transform.position + currentDrag.Value.point;
+                float distance = Vector3.Distance(Camera.main.transform.position, dragPoint);
+                if (Input.GetMouseButton(0) && distance < dragDistance)
+                {
+                    manager.playerDragIndicator.SetActive(true);
+                    manager.playerDragIndicator.transform.position = dragPoint;
+
+                    if (lastDraggerUpdateSentTime <= Time.timeAsDouble + (1d / draggerUpdateSendFrequency))
+                    {
+                        Vector3 desiredPosition = Camera.main.transform.position + (Camera.main.transform.forward * currentDrag.Value.distance);
+                        Vector3 target = desiredPosition - currentDrag.Value.point;
+                        CmdUpdateDragger(currentDrag.Value.draggable.netId, currentDrag.Value.point, target);
+                    }
+                }
+                else
+                {
+                    currentDrag = null;
+                    manager.playerDragIndicator.SetActive(false);
+                }
+            }
         }
 
         UpdateSlot();
@@ -137,7 +147,14 @@ public class PlayerInteraction : NetworkBehaviour
     #endregion Player Callbacks
 
     #region Dragging
-
+    [Command(channel = Channels.Unreliable)]
+    public void CmdUpdateDragger(uint draggerNetId, Vector3 point, Vector3 target)
+    {
+        if (manager.DraggableLookup.TryGetWithNetId(draggerNetId, out var draggable))
+        {
+            draggable.UpdateDragger(netId, point, target);
+        }
+    }
     #endregion Dragging
 
     #region Slot

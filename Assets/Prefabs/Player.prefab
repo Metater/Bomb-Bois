@@ -336,8 +336,11 @@ MonoBehaviour:
   itemSmoothTime: 0
   itemRotationSlerpMultiplier: 20
   selectedSlotSynced: 0
+  dragDistance: 5
+  draggerUpdateSendFrequency: 30
   crosshairDefaultColor: {r: 1, g: 1, b: 1, a: 0.49803922}
   crosshairHoverItemColor: {r: 0.20392157, g: 0.5647059, b: 0.8117647, a: 0.49803922}
+  crosshairHoverDraggableColor: {r: 0.6901961, g: 0.19215687, b: 0.22745098, a: 0.49803922}
 --- !u!143 &419259823955123667
 CharacterController:
   m_ObjectHideFlags: 0
