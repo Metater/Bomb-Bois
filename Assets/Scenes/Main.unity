@@ -3127,7 +3127,7 @@ GameObject:
   - component: {fileID: 662432440}
   - component: {fileID: 662432442}
   - component: {fileID: 662432441}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: --------MAGNETIC--------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3162,7 +3162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isMagneticForceRandomized: 1
-  randomizedMagneticForceRange: {x: 0, y: 2}
+  randomizedMagneticForceRange: {x: 0, y: 0.25}
   magneticForce: 1
 --- !u!135 &662432442
 SphereCollider:

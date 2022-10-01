@@ -332,11 +332,11 @@ MonoBehaviour:
   syncInterval: 0.1
   player: {fileID: 1718064819950168165}
   gripTransform: {fileID: 8926713826990989938}
-  reachDistance: 3.5
+  reachDistance: 3
   itemSmoothTime: 0
   itemRotationSlerpMultiplier: 20
   selectedSlotSynced: 0
-  dragDistance: 7
+  dragDistance: 6
   draggerUpdateSendFrequency: 60
   crosshairDefaultColor: {r: 1, g: 1, b: 1, a: 0.49803922}
   crosshairHoverItemColor: {r: 0.20392157, g: 0.5647059, b: 0.8117647, a: 0.49803922}
