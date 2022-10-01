@@ -18,6 +18,23 @@ public class GameManager : NetworkBehaviour
     public GameObject playerDragStartIndicator;
     public LineRenderer playerDragLineIndicator;
 
+    // amoung us wires, drag and match colors
+
+    /*
+     * lightlevel (variable flashlight)
+     * temperature (liquid nitrogen sprayer, blow torch)
+     * wind (fan that gets set up and powered???)
+     * gas type (gas canister and leak gas), hit percentage range
+     * switches (flip switches in circuit??)
+     * humidity (water sprayer, hair dryer)
+     * reroll
+     * d flip flop
+     * tone generator
+     * voltage (apply certain voltage to it)??
+     * all of these have safe default values that you want to be at when reroll happens
+     * all of these have a certain time you have to be at the unsafe value for for kaboom
+    */
+
     [Header("Prefabs")]
 
     public GameObject otherPlayerDragIndicatorPrefab;

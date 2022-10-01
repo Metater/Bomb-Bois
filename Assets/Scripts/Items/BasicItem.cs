@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BallItem : Item
+public class BasicItem : Item
 {
     protected override void Pickup()
     {

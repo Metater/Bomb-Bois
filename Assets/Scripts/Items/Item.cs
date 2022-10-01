@@ -3,9 +3,9 @@ using UnityEngine;
 
 public abstract class Item : NetworkBehaviour
 {
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private float dropForce;
-    [SerializeField] private GameObject modelGameObject;
+    [SerializeField] protected Rigidbody rb;
+    [SerializeField] protected float dropForce;
+    [SerializeField] protected GameObject modelGameObject;
 
     [System.NonSerialized] public Vector3 smoothDampVelocity = Vector3.zero;
 
