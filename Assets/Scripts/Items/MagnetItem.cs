@@ -49,7 +49,7 @@ public class MagnetItem : Item
         }
 
         float force = GetAttractionForce(magnetic);
-        Vector3 vector = transform.position - magnetic.transform.position;
+        Vector3 vector = magnetic.transform.position - transform.position;
         rb.AddForce(Time.deltaTime * force * vector, ForceMode.VelocityChange);
     }
 

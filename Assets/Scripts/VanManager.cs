@@ -16,8 +16,8 @@ public class VanManager : MonoBehaviour
     [SerializeField] private float screechDelayTime;
     [SerializeField] private float introDelayTime;
     [Space]
-    [SerializeField] private float slideDoorTime;
-    [SerializeField] private float timeToSlideDoor;
+    [SerializeField] private float slideDoorTime = 10;
+    [SerializeField] private float timeToSlideDoor = 2.5f;
 
     #region Unity
     private void Awake()
