@@ -16,6 +16,8 @@ public class MagnetItem : Item
     // shift = sqrt(constant / forceAtZeroDistance)
     // f(distance) = constant / ((distance + shift)^2)
 
+    //https://www.desmos.com/calculator/jar9rvpkp8
+
     protected override void Pickup()
     {
 
