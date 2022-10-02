@@ -9771,7 +9771,7 @@ GameObject:
   - component: {fileID: 2040719245}
   - component: {fileID: 2040719246}
   - component: {fileID: 2040719247}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: --------MAGNETIC--------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
