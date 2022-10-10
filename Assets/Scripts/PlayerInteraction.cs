@@ -148,6 +148,11 @@ public class PlayerInteraction : NetworkBehaviour
             {
                 CmdDropItem(selectedItem.netId, Camera.main.transform.forward, player.playerMovement.Velocity);
             }
+            if (selectedItem is MagnetItem)
+            {
+                var magnetItem = selectedItem as MagnetItem;
+
+            }
         }
 
         foreach (var item in slots)

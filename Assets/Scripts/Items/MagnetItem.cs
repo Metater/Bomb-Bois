@@ -18,6 +18,13 @@ public class MagnetItem : Item
 
     //https://www.desmos.com/calculator/jar9rvpkp8
 
+    private List<(int frame, Vector3 force)> forces;
+
+    private void Awake()
+    {
+        forces = new();
+    }
+
     protected override void Pickup()
     {
 
@@ -40,19 +47,27 @@ public class MagnetItem : Item
     }
     protected override void RightClick()
     {
-
+        
     }
 
     public void OnMagneticStay(Magnetic magnetic)
     {
-        if (IsPickedUp || !hasAuthority)
+        if (!hasAuthority)
         {
             return;
         }
+        
+        if (IsPickedUp)
+        {
+            print("does this print!!!");
+            return;
+        }
 
-        float force = GetAttractionForce(magnetic);
+        float magnitude = GetAttractionForce(magnetic);
         Vector3 vector = magnetic.transform.position - transform.position;
-        rb.AddForce(Time.deltaTime * force * vector, ForceMode.VelocityChange);
+        Vector3 force = magnitude * vector;
+
+        rb.AddForce(Time.deltaTime * force, ForceMode.VelocityChange);
     }
 
     private float GetAttractionForce(Magnetic magnetic)
